@@ -4,111 +4,355 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FOLTEC - Inventario</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0f0f0f;--surface:#1a1a1a;--text:#f0f0f0;--accent:#c8f135;--border:#2e2e2e;--red:#ff4444;--yellow:#f5c518;--green:#30d158;}
-*{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;width:100%;}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
-header{padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface);}
-.logo{font-family:'DM Mono',monospace;font-size:15px;font-weight:600;color:var(--accent);margin-bottom:8px;}
-.stats{display:flex;gap:20px;font-size:11px;}
-.stat-val{font-family:'DM Mono',monospace;font-size:16px;font-weight:600;margin-top:3px;}
-.nav-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);}
-.nav-tab{padding:10px 16px;cursor:pointer;border:none;background:none;color:#888;font-size:12px;font-weight:500;border-bottom:2px solid transparent;font-family:'DM Sans',sans-serif;}
-.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
-.layout{display:flex;flex:1;overflow:hidden;}
-.sidebar{width:260px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
-.sidebar-top{padding:12px;border-bottom:1px solid var(--border);flex-shrink:0;}
-.search{width:100%;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;outline:none;font-family:'DM Sans',sans-serif;}
-.search:focus{border-color:var(--accent);}
-.mat-list{flex:1;overflow-y:auto;padding:6px;}
-.mat-list::-webkit-scrollbar{width:3px;}
-.mat-list::-webkit-scrollbar-thumb{background:var(--border);}
-.mat-item{padding:8px;border-radius:4px;margin-bottom:2px;cursor:pointer;border:1px solid transparent;font-size:11px;transition:all 0.15s;}
-.mat-item:hover{background:rgba(255,255,255,0.05);}
-.mat-item.active{background:rgba(200,241,53,0.15);border-color:var(--accent);}
-.mat-name{font-family:'DM Mono',monospace;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.mat-stock{font-size:10px;color:#888;margin-top:2px;}
-.main{flex:1;overflow-y:auto;padding:20px;}
-.main::-webkit-scrollbar{width:3px;}
-.main::-webkit-scrollbar-thumb{background:var(--border);}
-.no-content{display:flex;align-items:center;justify-content:center;height:100%;color:#888;font-size:13px;}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:14px;}
-.card-title{font-family:'DM Mono',monospace;font-size:14px;font-weight:600;margin-bottom:10px;}
-.card-stat{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
-.stat-box{background:var(--bg);padding:10px;border-radius:4px;border:1px solid var(--border);}
-.stat-box-label{font-size:9px;color:#888;text-transform:uppercase;}
-.stat-box-val{font-family:'DM Mono',monospace;font-size:16px;font-weight:600;margin-top:4px;}
-.btn{padding:7px 14px;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;font-family:'DM Sans',sans-serif;}
-.btn-primary{background:var(--accent);color:#0f0f0f;}
-.page{display:none;}
-.page.active{display:flex;flex:1;flex-direction:column;overflow:hidden;}
-.toast{position:fixed;bottom:15px;right:15px;padding:10px 16px;border-radius:4px;font-size:11px;background:var(--green);color:white;z-index:1000;opacity:0;transition:opacity 0.3s;}
-.toast.show{opacity:1;}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; width: 100%; }
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #0f0f0f; 
+  color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+}
+header {
+  background: #1a1a1a;
+  border-bottom: 1px solid #2e2e2e;
+  padding: 16px 20px;
+}
+.header-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #c8f135;
+  margin-bottom: 8px;
+}
+.header-stats {
+  display: flex;
+  gap: 24px;
+  font-size: 11px;
+}
+.stat-item {
+  text-align: left;
+}
+.stat-val {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+.tabs {
+  background: #1a1a1a;
+  border-bottom: 1px solid #2e2e2e;
+  display: flex;
+}
+.tab-btn {
+  flex: 1;
+  padding: 12px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.tab-btn.active {
+  color: #c8f135;
+  border-bottom: 2px solid #c8f135;
+}
+.container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+.sidebar {
+  width: 280px;
+  background: #1a1a1a;
+  border-right: 1px solid #2e2e2e;
+  display: flex;
+  flex-direction: column;
+}
+.search-box {
+  padding: 12px;
+  border-bottom: 1px solid #2e2e2e;
+}
+.search-box input {
+  width: 100%;
+  background: #0f0f0f;
+  border: 1px solid #2e2e2e;
+  color: #f0f0f0;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  outline: none;
+}
+.search-box input:focus {
+  border-color: #c8f135;
+}
+.mat-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+.mat-item {
+  padding: 10px;
+  margin-bottom: 4px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  transition: all 0.2s;
+}
+.mat-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+.mat-item.active {
+  background: rgba(200, 241, 53, 0.15);
+  border-color: #c8f135;
+}
+.mat-item-name {
+  font-weight: 600;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mat-item-stock {
+  color: #888;
+  font-size: 10px;
+}
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: #0f0f0f;
+}
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #888;
+  font-size: 13px;
+}
+.card {
+  background: #1a1a1a;
+  border: 1px solid #2e2e2e;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.card-text {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 12px;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.stat-box {
+  background: #0f0f0f;
+  border: 1px solid #2e2e2e;
+  padding: 12px;
+  border-radius: 4px;
+}
+.stat-box-label {
+  font-size: 9px;
+  color: #888;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.stat-box-val {
+  font-size: 18px;
+  font-weight: 600;
+}
+.btn {
+  width: 100%;
+  padding: 8px;
+  background: #c8f135;
+  color: #0f0f0f;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.page { display: none; }
+.page.active { display: flex; flex-direction: column; }
 </style>
 </head>
 <body>
+
 <header>
-  <div class="logo">FOLTEC / INVENTARIO</div>
-  <div class="stats">
-    <div class="stat"><span style="color:#888;font-size:9px;text-transform:uppercase;">Valor</span><div class="stat-val" id="stat-valor">$0</div></div>
-    <div class="stat"><span style="color:#888;font-size:9px;text-transform:uppercase;">Alertas</span><div class="stat-val" style="color:var(--yellow);" id="stat-alertas">0</div></div>
-    <div class="stat"><span style="color:#888;font-size:9px;text-transform:uppercase;">Sin stock</span><div class="stat-val" style="color:var(--red);" id="stat-sin">0</div></div>
+  <div class="header-title">FOLTEC / INVENTARIO</div>
+  <div class="header-stats">
+    <div class="stat-item">
+      <span style="color: #888;">Valor</span>
+      <div class="stat-val" id="stat-valor">$0</div>
+    </div>
+    <div class="stat-item">
+      <span style="color: #888;">Alertas</span>
+      <div class="stat-val" style="color: #f5c518;" id="stat-alertas">0</div>
+    </div>
+    <div class="stat-item">
+      <span style="color: #888;">Sin stock</span>
+      <div class="stat-val" style="color: #ff4444;" id="stat-sin">0</div>
+    </div>
   </div>
 </header>
 
-<div class="nav-tabs">
-  <button class="nav-tab active" onclick="showPage('inv')">Inventario</button>
-  <button class="nav-tab" onclick="showPage('prod')">Producción</button>
-  <button class="nav-tab" onclick="showPage('hist')">Historial</button>
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('inv')">Inventario</button>
+  <button class="tab-btn" onclick="switchTab('prod')">Producción</button>
+  <button class="tab-btn" onclick="switchTab('hist')">Historial</button>
 </div>
 
-<div class="layout">
-  <div class="page active" id="page-inv">
+<div class="container">
+  <div class="page active" id="page-inv" style="flex-direction: row;">
     <div class="sidebar">
-      <div class="sidebar-top">
-        <input class="search" type="text" placeholder="Buscar..." id="search-box" oninput="filterMats()">
+      <div class="search-box">
+        <input type="text" id="search" placeholder="Buscar..." onkeyup="filterMats()">
       </div>
       <div class="mat-list" id="mat-list"></div>
     </div>
-    <div class="main" id="main-detail"><div class="no-content">← Selecciona un material</div></div>
+    <div class="content" id="content-inv">
+      <div class="empty">← Selecciona un material</div>
+    </div>
   </div>
 
-  <div class="page" id="page-prod">
-    <div class="main" style="max-width:800px;margin:0 auto;width:100%;">
+  <div class="page" id="page-prod" style="flex-direction: column;">
+    <div class="content">
       <div class="card">
-        <div class="card-title">Producción (en desarrollo)</div>
-        <p style="font-size:11px;color:#888;">Feature próximamente</p>
+        <div class="card-title">Producción</div>
+        <div class="card-text">Feature en desarrollo</div>
       </div>
     </div>
   </div>
 
-  <div class="page" id="page-hist">
-    <div class="main" style="max-width:800px;margin:0 auto;width:100%;">
+  <div class="page" id="page-hist" style="flex-direction: column;">
+    <div class="content">
       <div class="card">
-        <div class="card-title">Historial (en desarrollo)</div>
-        <p style="font-size:11px;color:#888;">Feature próximamente</p>
+        <div class="card-title">Historial</div>
+        <div class="card-text">Feature en desarrollo</div>
       </div>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
-const MATS=[{id:1,p:"ADIKEM 100",f:"REG PH",s:20,c:4.94},{id:2,p:"ALCOHOL ETÍLICO",f:"COALESCENTE",s:63,c:0.97},{id:3,p:"AMARILLO CROMO",f:"PIGMENTO",s:24,c:7.80},{id:4,p:"ARD 775",f:"RESINA",s:57,c:4.00},{id:5,p:"BEATRAF",f:"RESINA",s:71,c:1.00},{id:6,p:"BELCARE EA-220",f:"ESPESANTE",s:0,c:4.00},{id:7,p:"BELCARE PU 40",f:"ESPESANTE",s:6,c:6.90},{id:8,p:"BUTILCELLOSOLVE",f:"COALESCENTE",s:40,c:2.27},{id:9,p:"DEFOCARE 30 C",f:"ANTIESPUMANTE",s:24,c:3.99},{id:10,p:"DISPERCLAIR",f:"ANTIESPUMANTE",s:209,c:1.00},{id:11,p:"ED 50 W",f:"ESPESANTE",s:22,c:7.50},{id:12,p:"ESACOL ED 30 W",f:"ESPESANTE",s:20,c:10.17},{id:13,p:"MEG",f:"COALESCENTE",s:20,c:0.71},{id:14,p:"MOWILITH DM - 771",f:"RESINA",s:18,c:3.77},{id:15,p:"MOWILITH DM 611",f:"RESINA",s:18,c:3.43},{id:16,p:"MOWILITH DM 551",f:"RESINA",s:0,c:2.41},{id:17,p:"NEGRO",f:"PIGMENTO",s:10,c:5.10},{id:18,p:"OMICARB 1",f:"CARGA",s:200,c:0.33},{id:19,p:"OMICARB 1 T",f:"CARGA",s:50,c:0.42},{id:20,p:"OMICARB 10",f:"CARGA",s:150,c:0.14},{id:21,p:"OMICARB 4",f:"CARGA",s:74,c:0.27},{id:22,p:"POLYMER GR-C77D",f:"RESINA",s:171,c:2.55},{id:23,p:"POLYMER PT",f:"RESINA",s:200,c:2.54},{id:24,p:"POLIESPERSE",f:"DISPERSANTE",s:24,c:3.31},{id:25,p:"POLIGLOSS 90",f:"EXTENDER",s:20,c:2.34},{id:26,p:"POLIWETT",f:"HUMECTANTE",s:19,c:8.18},{id:27,p:"PROMOCIDE ID",f:"BIOCIDA",s:17.94,c:3.30},{id:28,p:"PROMOCIDE OI",f:"BIOCIDA",s:0,c:9.64},{id:29,p:"PV BRIGHT 620",f:"CARGA",s:120.5,c:1.14},{id:30,p:"ROJO ESCARLATA",f:"PIGMENTO",s:15,c:8.23},{id:31,p:"ROJO ÓXIDO MICRONIZADO",f:"PIGMENTO",s:25,c:3.70},{id:32,p:"SMARTEX",f:"REG PH",s:3,c:7.56},{id:33,p:"TEXANOL",f:"COALESCENTE",s:0.50,c:3.70},{id:34,p:"TIO 2 NTR - 606",f:"PIGMENTO",s:95,c:3.35},{id:35,p:"TIO2 TI PURE R 706",f:"PIGMENTO",s:64,c:4.00},{id:36,p:"TRIPOLIFOSFATO DE POTASIO",f:"SECUESTRANTE",s:25,c:7.70},{id:37,p:"VISCOLAM 635",f:"ESPESANTE",s:19,c:3.66}];
+const MATERIALES = [
+  {id:1,nombre:"ADIKEM 100",stock:20,costo:4.94},
+  {id:2,nombre:"ALCOHOL ETÍLICO",stock:63,costo:0.97},
+  {id:3,nombre:"AMARILLO CROMO",stock:24,costo:7.80},
+  {id:4,nombre:"ARD 775",stock:57,costo:4.00},
+  {id:5,nombre:"BEATRAF",stock:71.4,costo:1.00},
+  {id:6,nombre:"BELCARE EA-220",stock:0,costo:4.00},
+  {id:7,nombre:"BELCARE PU 40",stock:6,costo:6.90},
+  {id:8,nombre:"BUTILCELLOSOLVE",stock:40,costo:2.27},
+  {id:9,nombre:"DEFOCARE 30 C",stock:24,costo:3.99},
+  {id:10,nombre:"DISPERCLAIR",stock:209,costo:1.00},
+  {id:11,nombre:"ED 50 W",stock:22,costo:7.50},
+  {id:12,nombre:"ESACOL ED 30 W",stock:20,costo:10.17},
+  {id:13,nombre:"MEG",stock:20,costo:0.71},
+  {id:14,nombre:"MOWILITH DM - 771",stock:18,costo:3.77},
+  {id:15,nombre:"MOWILITH DM 611",stock:18,costo:3.43},
+  {id:16,nombre:"MOWILITH DM 551",stock:0,costo:2.41},
+  {id:17,nombre:"NEGRO",stock:10,costo:5.10},
+  {id:18,nombre:"OMICARB 1",stock:200,costo:0.33},
+  {id:19,nombre:"OMICARB 1 T",stock:50,costo:0.42},
+  {id:20,nombre:"OMICARB 10",stock:150,costo:0.14},
+  {id:21,nombre:"OMICARB 4",stock:74,costo:0.27},
+  {id:22,nombre:"POLYMER GR-C77D",stock:171,costo:2.55},
+  {id:23,nombre:"POLYMER PT",stock:200,costo:2.54},
+  {id:24,nombre:"POLIESPERSE",stock:24,costo:3.31},
+  {id:25,nombre:"POLIGLOSS 90",stock:20,costo:2.34},
+  {id:26,nombre:"POLIWETT",stock:19,costo:8.18},
+  {id:27,nombre:"PROMOCIDE ID",stock:17.94,costo:3.30},
+  {id:28,nombre:"PROMOCIDE OI",stock:0,costo:9.64},
+  {id:29,nombre:"PV BRIGHT 620",stock:120.5,costo:1.14},
+  {id:30,nombre:"ROJO ESCARLATA",stock:15,costo:8.23},
+  {id:31,nombre:"ROJO ÓXIDO MICRONIZADO",stock:25,costo:3.70},
+  {id:32,nombre:"SMARTEX",stock:3,costo:7.56},
+  {id:33,nombre:"TEXANOL",stock:0.5,costo:3.70},
+  {id:34,nombre:"TIO 2 NTR - 606",stock:95,costo:3.35},
+  {id:35,nombre:"TIO2 TI PURE R 706",stock:64,costo:4.00},
+  {id:36,nombre:"TRIPOLIFOSFATO DE POTASIO",stock:25,costo:7.70},
+  {id:37,nombre:"VISCOLAM 635",stock:19,costo:3.66}
+];
 
-let sel=null;
-let mats=JSON.parse(localStorage.getItem('fmat')||'null')||MATS;
+let selectedId = null;
 
-function save(){localStorage.setItem('fmat',JSON.stringify(mats));}
-function upStats(){let v=0,a=0,z=0;for(let m of mats){v+=m.s*m.c;if(m.s<=0)z++;else if(m.s<=10)a++;}document.getElementById('stat-valor').textContent='$'+Math.round(v);document.getElementById('stat-alertas').textContent=a;document.getElementById('stat-sin').textContent=z;}
-function filterMats(){let q=document.getElementById('search-box').value.toLowerCase();let html='';for(let m of mats){if(m.p.toLowerCase().includes(q)){let col=m.s>0?'var(--green)':'var(--red)';html+=`<div class="mat-item ${sel===m.id?'active':''}" onclick="selMat(${m.id})"><div class="mat-name">${m.p}</div><div class="mat-stock" style="color:${col}">${m.s}kg</div></div>`;}}document.getElementById('mat-list').innerHTML=html;}
-function selMat(id){sel=id;let m=mats.find(x=>x.id===id);let html=`<div class="card"><div class="card-title">${m.p}</div><div style="font-size:10px;color:#888;margin-bottom:12px;">${m.f}</div><div class="card-stat"><div class="stat-box"><div class="stat-box-label">Stock</div><div class="stat-box-val">${m.s}</div></div><div class="stat-box"><div class="stat-box-label">Valor</div><div class="stat-box-val">$${(m.s*m.c).toFixed(0)}</div></div></div><button class="btn btn-primary" style="width:100%;" onclick="regMov()">Registrar movimiento</button></div>`;document.getElementById('main-detail').innerHTML=html;filterMats();upStats();}
-function regMov(){if(!sel)return;let tipo=prompt('Tipo (uso/compra):');if(!tipo)return;let cant=parseFloat(prompt('Cantidad (kg):'));if(!cant)return;let m=mats.find(x=>x.id===sel);if(tipo==='uso'){if(cant>m.s){alert('Stock insuficiente');return;}m.s-=cant;}else m.s+=cant;save();alert('✓ Movimiento registrado');selMat(sel);}
-function showPage(page){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));let id='page-'+page;document.getElementById(id).classList.add('active');document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');if(page==='inv')filterMats();}
-filterMats();upStats();
+function updateStats() {
+  let valor = 0, alertas = 0, sin = 0;
+  MATERIALES.forEach(m => {
+    valor += m.stock * m.costo;
+    if (m.stock <= 0) sin++;
+    else if (m.stock <= 10) alertas++;
+  });
+  document.getElementById('stat-valor').textContent = '$' + Math.round(valor);
+  document.getElementById('stat-alertas').textContent = alertas;
+  document.getElementById('stat-sin').textContent = sin;
+}
+
+function filterMats() {
+  let q = document.getElementById('search').value.toLowerCase();
+  let html = '';
+  MATERIALES.forEach(m => {
+    if (m.nombre.toLowerCase().includes(q)) {
+      let color = m.stock > 0 ? '#30d158' : '#ff4444';
+      html += `
+        <div class="mat-item ${selectedId === m.id ? 'active' : ''}" onclick="selectMat(${m.id})">
+          <div class="mat-item-name">${m.nombre}</div>
+          <div class="mat-item-stock" style="color: ${color};">${m.stock} kg</div>
+        </div>
+      `;
+    }
+  });
+  document.getElementById('mat-list').innerHTML = html;
+}
+
+function selectMat(id) {
+  selectedId = id;
+  let m = MATERIALES.find(x => x.id === id);
+  let valor = m.stock * m.costo;
+  let html = `
+    <div class="card">
+      <div class="card-title">${m.nombre}</div>
+      <div class="card-text">Gestionar stock y movimientos</div>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-box-label">Stock</div>
+          <div class="stat-box-val">${m.stock} kg</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">Valor</div>
+          <div class="stat-box-val">$${Math.round(valor)}</div>
+        </div>
+      </div>
+      <button class="btn" onclick="alert('Feature en desarrollo')">Registrar movimiento</button>
+    </div>
+  `;
+  document.getElementById('content-inv').innerHTML = html;
+  filterMats();
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// Inicializar
+filterMats();
+updateStats();
 </script>
+
 </body>
 </html>

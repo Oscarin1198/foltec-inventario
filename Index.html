@@ -127,14 +127,12 @@
   .ing-chip{background:var(--surface2);border-radius:4px;padding:3px 8px;font-size:10px;font-family:'DM Mono',monospace;color:var(--text-dim);}
 </style>
 
-<script async src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const SUPABASE_URL = 'https://vtrxcymrxlzzrvigwiei.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_s3aj-vyY5F51ZpGN2AkAmg_DHO3Lc6O';
   const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 </script>
 
-<script async src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <header>
@@ -327,21 +325,6 @@ const MATERIALES_INIT = [
 // FÓRMULAS: cantidades en kg por presentación (100LT, 20LT, 3.785LT, 1LT)
 // mat_id: id del material en MATERIALES_INIT
 
-// ============================================================
-// SUPABASE CONFIG
-// ============================================================
-const SUPABASE_URL = 'https://vtrxcymrxlzzrvigwiei.supabase.co';
-const SUPABASE_ANONKEY = 'sb_publishable_s3aj-vyY5F51ZpGN2AkAmg_DHO3Lc6O';
-let supabase = null;
-
-// Esperar a que Supabase cargue
-window.addEventListener('load', () => {
-  if(window.supabase){
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANONKEY);
-    console.log('Supabase inicializado');
-  }
-});
-
 const FORMULAS = {
   "Malimper 5 Años Blanco": {
     desc: "Impermeabilizante blanco 5 años",
@@ -458,8 +441,7 @@ const PRODUCTOS_LIST = ["Malin Pro","Malvex Plus","Malvex Ultra","Maltraf Blanca
 // ============================================================
 // ESTADO
 // ============================================================
-let materiales = JSON.parse(JSON.stringify(MATERIALES_INIT));
-let supabaseReady = false;
+let materiales = JSON.parse(localStorage.getItem('foltec_mat3')||'null') || MATERIALES_INIT;
 let movimientos = JSON.parse(localStorage.getItem('foltec_mov3')||'[]');
 let prodHistorial = JSON.parse(localStorage.getItem('foltec_prod3')||'[]');
 let selectedId=null, filtro='TODOS', busqueda='';
@@ -535,7 +517,7 @@ async function initSupabase(){
   }
 }
 
-initSupabase();
+renderSidebar();renderMain();
   if(selectedId) renderMain();
   renderProdHistorial();
   document.getElementById('btn-deshacer').style.display='none';

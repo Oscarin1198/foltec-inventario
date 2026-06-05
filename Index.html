@@ -6,120 +6,109 @@
 <title>FOLTEC - Inventario</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0f0f0f;--surface:#1a1a1a;--text:#f0f0f0;--accent:#c8f135;--border:#2e2e2e;--red:#ff4444;--yellow:#f5c518;--green:#30d158;--blue:#0a84ff;}
+:root{--bg:#0f0f0f;--surface:#1a1a1a;--text:#f0f0f0;--accent:#c8f135;--border:#2e2e2e;--red:#ff4444;--yellow:#f5c518;--green:#30d158;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;}
-header{padding:14px 24px;border-bottom:1px solid var(--border);background:var(--surface);}
-.logo{font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--accent);margin-bottom:8px;}
-.stats{display:flex;gap:24px;font-size:12px;}
-.stat{text-align:left;}
-.stat-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:600;margin-top:4px;}
+html,body{height:100%;width:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
+header{padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface);}
+.logo{font-family:'DM Mono',monospace;font-size:15px;font-weight:600;color:var(--accent);margin-bottom:8px;}
+.stats{display:flex;gap:20px;font-size:11px;}
+.stat-val{font-family:'DM Mono',monospace;font-size:16px;font-weight:600;margin-top:3px;}
 .nav-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);}
-.nav-tab{padding:12px 20px;cursor:pointer;border:none;background:none;color:#888;font-size:13px;font-weight:500;border-bottom:2px solid transparent;}
+.nav-tab{padding:10px 16px;cursor:pointer;border:none;background:none;color:#888;font-size:12px;font-weight:500;border-bottom:2px solid transparent;font-family:'DM Sans',sans-serif;}
 .nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .layout{display:flex;flex:1;overflow:hidden;}
-.sidebar{width:280px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;}
-.sidebar-top{padding:14px;border-bottom:1px solid var(--border);}
-.search{width:100%;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;outline:none;}
+.sidebar{width:260px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.sidebar-top{padding:12px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.search{width:100%;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;outline:none;font-family:'DM Sans',sans-serif;}
 .search:focus{border-color:var(--accent);}
-.mat-list{flex:1;overflow-y:auto;padding:7px;}
-.mat-item{padding:10px;border-radius:6px;margin-bottom:3px;cursor:pointer;border:1px solid transparent;font-size:12px;}
-.mat-item:hover{background:var(--surface);}
-.mat-item.active{background:rgba(200,241,53,0.1);border-color:var(--accent);}
-.mat-item-name{font-family:'DM Mono',monospace;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.mat-item-stock{font-size:11px;color:#888;margin-top:3px;}
-.main{flex:1;overflow-y:auto;padding:24px;}
-.main::-webkit-scrollbar{width:4px;}
-.main::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
-.no-content{display:flex;align-items:center;justify-content:center;height:100%;color:#888;font-size:14px;}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:16px;}
-.card-title{font-family:'DM Mono',monospace;font-size:16px;font-weight:600;margin-bottom:12px;}
-.btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;}
+.mat-list{flex:1;overflow-y:auto;padding:6px;}
+.mat-list::-webkit-scrollbar{width:3px;}
+.mat-list::-webkit-scrollbar-thumb{background:var(--border);}
+.mat-item{padding:8px;border-radius:4px;margin-bottom:2px;cursor:pointer;border:1px solid transparent;font-size:11px;transition:all 0.15s;}
+.mat-item:hover{background:rgba(255,255,255,0.05);}
+.mat-item.active{background:rgba(200,241,53,0.15);border-color:var(--accent);}
+.mat-name{font-family:'DM Mono',monospace;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mat-stock{font-size:10px;color:#888;margin-top:2px;}
+.main{flex:1;overflow-y:auto;padding:20px;}
+.main::-webkit-scrollbar{width:3px;}
+.main::-webkit-scrollbar-thumb{background:var(--border);}
+.no-content{display:flex;align-items:center;justify-content:center;height:100%;color:#888;font-size:13px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:14px;}
+.card-title{font-family:'DM Mono',monospace;font-size:14px;font-weight:600;margin-bottom:10px;}
+.card-stat{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.stat-box{background:var(--bg);padding:10px;border-radius:4px;border:1px solid var(--border);}
+.stat-box-label{font-size:9px;color:#888;text-transform:uppercase;}
+.stat-box-val{font-family:'DM Mono',monospace;font-size:16px;font-weight:600;margin-top:4px;}
+.btn{padding:7px 14px;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;font-family:'DM Sans',sans-serif;}
 .btn-primary{background:var(--accent);color:#0f0f0f;}
-.btn-outline{background:transparent;border:1px solid var(--accent);color:var(--accent);}
-.form-input{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--text);font-size:12px;outline:none;margin-top:4px;width:100%;}
-.form-input:focus{border-color:var(--accent);}
-.toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:6px;font-size:12px;background:var(--green);color:white;z-index:1000;opacity:0;transition:opacity 0.3s;}
-.toast.show{opacity:1;}
 .page{display:none;}
 .page.active{display:flex;flex:1;flex-direction:column;overflow:hidden;}
+.toast{position:fixed;bottom:15px;right:15px;padding:10px 16px;border-radius:4px;font-size:11px;background:var(--green);color:white;z-index:1000;opacity:0;transition:opacity 0.3s;}
+.toast.show{opacity:1;}
 </style>
 </head>
 <body>
 <header>
   <div class="logo">FOLTEC / INVENTARIO</div>
   <div class="stats">
-    <div class="stat"><span style="color:#888;font-size:10px;text-transform:uppercase;">Valor</span><div class="stat-val" id="stat-valor">$0</div></div>
-    <div class="stat"><span style="color:#888;font-size:10px;text-transform:uppercase;">Alertas</span><div class="stat-val" style="color:var(--yellow);" id="stat-alertas">0</div></div>
-    <div class="stat"><span style="color:#888;font-size:10px;text-transform:uppercase;">Sin stock</span><div class="stat-val" style="color:var(--red);" id="stat-sin">0</div></div>
+    <div class="stat"><span style="color:#888;font-size:9px;text-transform:uppercase;">Valor</span><div class="stat-val" id="stat-valor">$0</div></div>
+    <div class="stat"><span style="color:#888;font-size:9px;text-transform:uppercase;">Alertas</span><div class="stat-val" style="color:var(--yellow);" id="stat-alertas">0</div></div>
+    <div class="stat"><span style="color:#888;font-size:9px;text-transform:uppercase;">Sin stock</span><div class="stat-val" style="color:var(--red);" id="stat-sin">0</div></div>
   </div>
 </header>
 
 <div class="nav-tabs">
-  <button class="nav-tab active" onclick="tab('inventario')">Inventario</button>
-  <button class="nav-tab" onclick="tab('produccion')">Producción</button>
-  <button class="nav-tab" onclick="tab('historial')">Historial</button>
+  <button class="nav-tab active" onclick="showPage('inv')">Inventario</button>
+  <button class="nav-tab" onclick="showPage('prod')">Producción</button>
+  <button class="nav-tab" onclick="showPage('hist')">Historial</button>
 </div>
 
 <div class="layout">
-  <div class="page active" id="page-inventario">
+  <div class="page active" id="page-inv">
     <div class="sidebar">
       <div class="sidebar-top">
-        <input class="search" type="text" placeholder="Buscar..." id="search" onkeyup="renderMaterials()">
+        <input class="search" type="text" placeholder="Buscar..." id="search-box" oninput="filterMats()">
       </div>
       <div class="mat-list" id="mat-list"></div>
     </div>
-    <div class="main" id="main-inv"><div class="no-content">← Selecciona un material</div></div>
+    <div class="main" id="main-detail"><div class="no-content">← Selecciona un material</div></div>
   </div>
 
-  <div class="page" id="page-produccion" style="flex-direction:column;">
-    <div class="main" style="max-width:900px;margin:0 auto;width:100%;">
+  <div class="page" id="page-prod">
+    <div class="main" style="max-width:800px;margin:0 auto;width:100%;">
       <div class="card">
-        <div class="card-title">Selecciona producto</div>
-        <div id="prod-list" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;"></div>
-      </div>
-      <div id="pres-box" style="display:none;">
-        <div class="card">
-          <div class="card-title">Presentación y cantidad</div>
-          <div id="pres-list" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;"></div>
-          <input class="form-input" type="number" id="unid" placeholder="Unidades" value="1" min="1">
-          <button class="btn btn-primary" style="margin-top:8px;width:100%;" onclick="confirmarProd()">Confirmar producción</button>
-        </div>
+        <div class="card-title">Producción (en desarrollo)</div>
+        <p style="font-size:11px;color:#888;">Feature próximamente</p>
       </div>
     </div>
   </div>
 
-  <div class="page" id="page-historial" style="flex-direction:column;">
-    <div class="main" style="max-width:900px;margin:0 auto;width:100%;" id="hist-list"></div>
+  <div class="page" id="page-hist">
+    <div class="main" style="max-width:800px;margin:0 auto;width:100%;">
+      <div class="card">
+        <div class="card-title">Historial (en desarrollo)</div>
+        <p style="font-size:11px;color:#888;">Feature próximamente</p>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const MATERIALES=[{id:1,producto:"ADIKEM 100",funcion:"REGULADOR PH",stock:20,costo:4.94,proveedor:"ELITECH",stockMin:10},{id:2,producto:"ALCOHOL ETÍLICO",funcion:"COALESCENTE",stock:63,costo:0.97,proveedor:"GARZA",stockMin:20},{id:3,producto:"AMARILLO CROMO",funcion:"PIGMENTO",stock:24,costo:7.80,proveedor:"RANA",stockMin:25},{id:4,producto:"ARD 775",funcion:"RESINA",stock:57,costo:4.00,proveedor:"ELITECH",stockMin:200},{id:5,producto:"BEATRAF",funcion:"RESINA",stock:71.40,costo:1.00,proveedor:"ELITECH",stockMin:0},{id:6,producto:"BELCARE EA-220",funcion:"ESPESANTE",stock:0,costo:4.00,proveedor:"ELITECH",stockMin:0},{id:7,producto:"BELCARE PU 40",funcion:"ESPESANTE",stock:6,costo:6.90,proveedor:"ELITECH",stockMin:10},{id:8,producto:"BUTILCELLOSOLVE",funcion:"COALESCENTE",stock:40,costo:2.27,proveedor:"GARZA",stockMin:10},{id:9,producto:"DEFOCARE 30 C",funcion:"ANTIESPUMANTE",stock:24,costo:3.99,proveedor:"ELITECH",stockMin:5},{id:10,producto:"DISPERCLAIR",funcion:"ANTIESPUMANTE",stock:209,costo:1.00,proveedor:"ELITECH",stockMin:0},{id:11,producto:"ED 50 W",funcion:"ESPESANTE",stock:22,costo:7.50,proveedor:"ELITECH",stockMin:0},{id:12,producto:"ESACOL ED 30 W",funcion:"ESPESANTE",stock:20,costo:10.17,proveedor:"ELITECH",stockMin:25},{id:13,producto:"MEG",funcion:"COALESCENTE",stock:20,costo:0.71,proveedor:"GARZA",stockMin:10},{id:14,producto:"MOWILITH DM - 771",funcion:"RESINA",stock:18,costo:3.77,proveedor:"RANA",stockMin:200},{id:15,producto:"MOWILITH DM 611",funcion:"RESINA",stock:18,costo:3.43,proveedor:"RANA",stockMin:200},{id:16,producto:"MOWILITH DM 551",funcion:"RESINA",stock:0,costo:2.41,proveedor:"RANA",stockMin:200},{id:17,producto:"NEGRO",funcion:"PIGMENTO",stock:10,costo:5.10,proveedor:"RANA",stockMin:5},{id:18,producto:"OMICARB 1",funcion:"CARGA",stock:200,costo:0.33,proveedor:"TIZAYUCA",stockMin:125},{id:19,producto:"OMICARB 1 T",funcion:"CARGA",stock:50,costo:0.42,proveedor:"TIZAYUCA",stockMin:50},{id:20,producto:"OMICARB 10",funcion:"CARGA",stock:150,costo:0.14,proveedor:"REPTEC",stockMin:150},{id:21,producto:"OMICARB 4",funcion:"CARGA",stock:74,costo:0.27,proveedor:"TIZAYUCA",stockMin:0},{id:22,producto:"POLYMER GR-C77D",funcion:"RESINA",stock:171,costo:2.55,proveedor:"ELITECH",stockMin:200},{id:23,producto:"POLYMER PT",funcion:"RESINA",stock:200,costo:2.54,proveedor:"ELITECH",stockMin:200},{id:24,producto:"POLIESPERSE",funcion:"DISPERSANTE",stock:24,costo:3.31,proveedor:"ELITECH",stockMin:10},{id:25,producto:"POLIGLOSS 90",funcion:"EXTENDER",stock:20,costo:2.34,proveedor:"MOCAYCO",stockMin:0},{id:26,producto:"POLIWETT",funcion:"HUMECTANTE",stock:19,costo:8.18,proveedor:"ELITECH",stockMin:0},{id:27,producto:"PROMOCIDE ID",funcion:"BIOCIDA",stock:17.94,costo:3.30,proveedor:"ELITECH",stockMin:10},{id:28,producto:"PROMOCIDE OI",funcion:"BIOCIDA",stock:0,costo:9.64,proveedor:"ELITECH",stockMin:10},{id:29,producto:"PV BRIGHT 620",funcion:"CARGA",stock:120.50,costo:1.14,proveedor:"CANO",stockMin:25},{id:30,producto:"ROJO ESCARLATA",funcion:"PIGMENTO",stock:15,costo:8.23,proveedor:"RANA",stockMin:5},{id:31,producto:"ROJO ÓXIDO MICRONIZADO",funcion:"PIGMENTO",stock:25,costo:3.70,proveedor:"RANA",stockMin:10},{id:32,producto:"SMARTEX",funcion:"REGULADOR PH",stock:3,costo:7.56,proveedor:"ELITECH",stockMin:0},{id:33,producto:"TEXANOL",funcion:"COALESCENTE",stock:0.50,costo:3.70,proveedor:"GARZA",stockMin:10},{id:34,producto:"TIO 2 NTR - 606",funcion:"PIGMENTO",stock:95,costo:3.35,proveedor:"REPTEC",stockMin:100},{id:35,producto:"TIO2 TI PURE R 706",funcion:"PIGMENTO",stock:64,costo:4.00,proveedor:"CHEMIK",stockMin:0},{id:36,producto:"TRIPOLIFOSFATO DE POTASIO",funcion:"SECUESTRANTE",stock:25,costo:7.70,proveedor:"RANA",stockMin:5},{id:37,producto:"VISCOLAM 635",funcion:"ESPESANTE",stock:19,costo:3.66,proveedor:"ELITECH",stockMin:10}];
+const MATS=[{id:1,p:"ADIKEM 100",f:"REG PH",s:20,c:4.94},{id:2,p:"ALCOHOL ETÍLICO",f:"COALESCENTE",s:63,c:0.97},{id:3,p:"AMARILLO CROMO",f:"PIGMENTO",s:24,c:7.80},{id:4,p:"ARD 775",f:"RESINA",s:57,c:4.00},{id:5,p:"BEATRAF",f:"RESINA",s:71,c:1.00},{id:6,p:"BELCARE EA-220",f:"ESPESANTE",s:0,c:4.00},{id:7,p:"BELCARE PU 40",f:"ESPESANTE",s:6,c:6.90},{id:8,p:"BUTILCELLOSOLVE",f:"COALESCENTE",s:40,c:2.27},{id:9,p:"DEFOCARE 30 C",f:"ANTIESPUMANTE",s:24,c:3.99},{id:10,p:"DISPERCLAIR",f:"ANTIESPUMANTE",s:209,c:1.00},{id:11,p:"ED 50 W",f:"ESPESANTE",s:22,c:7.50},{id:12,p:"ESACOL ED 30 W",f:"ESPESANTE",s:20,c:10.17},{id:13,p:"MEG",f:"COALESCENTE",s:20,c:0.71},{id:14,p:"MOWILITH DM - 771",f:"RESINA",s:18,c:3.77},{id:15,p:"MOWILITH DM 611",f:"RESINA",s:18,c:3.43},{id:16,p:"MOWILITH DM 551",f:"RESINA",s:0,c:2.41},{id:17,p:"NEGRO",f:"PIGMENTO",s:10,c:5.10},{id:18,p:"OMICARB 1",f:"CARGA",s:200,c:0.33},{id:19,p:"OMICARB 1 T",f:"CARGA",s:50,c:0.42},{id:20,p:"OMICARB 10",f:"CARGA",s:150,c:0.14},{id:21,p:"OMICARB 4",f:"CARGA",s:74,c:0.27},{id:22,p:"POLYMER GR-C77D",f:"RESINA",s:171,c:2.55},{id:23,p:"POLYMER PT",f:"RESINA",s:200,c:2.54},{id:24,p:"POLIESPERSE",f:"DISPERSANTE",s:24,c:3.31},{id:25,p:"POLIGLOSS 90",f:"EXTENDER",s:20,c:2.34},{id:26,p:"POLIWETT",f:"HUMECTANTE",s:19,c:8.18},{id:27,p:"PROMOCIDE ID",f:"BIOCIDA",s:17.94,c:3.30},{id:28,p:"PROMOCIDE OI",f:"BIOCIDA",s:0,c:9.64},{id:29,p:"PV BRIGHT 620",f:"CARGA",s:120.5,c:1.14},{id:30,p:"ROJO ESCARLATA",f:"PIGMENTO",s:15,c:8.23},{id:31,p:"ROJO ÓXIDO MICRONIZADO",f:"PIGMENTO",s:25,c:3.70},{id:32,p:"SMARTEX",f:"REG PH",s:3,c:7.56},{id:33,p:"TEXANOL",f:"COALESCENTE",s:0.50,c:3.70},{id:34,p:"TIO 2 NTR - 606",f:"PIGMENTO",s:95,c:3.35},{id:35,p:"TIO2 TI PURE R 706",f:"PIGMENTO",s:64,c:4.00},{id:36,p:"TRIPOLIFOSFATO DE POTASIO",f:"SECUESTRANTE",s:25,c:7.70},{id:37,p:"VISCOLAM 635",f:"ESPESANTE",s:19,c:3.66}];
 
-const FORMULAS={Malimper:[{pres:"100 LT",factor:1},{pres:"200 LT",factor:2},{pres:"20 LT",factor:0.2},{pres:"1 LT",factor:0.01}],Maltraf:[{pres:"100 LT",factor:1},{pres:"200 LT",factor:2},{pres:"20 LT",factor:0.2},{pres:"1 LT",factor:0.01}],Malvex:[{pres:"100 LT",factor:1},{pres:"200 LT",factor:2},{pres:"20 LT",factor:0.2},{pres:"1 LT",factor:0.01}]};
+let sel=null;
+let mats=JSON.parse(localStorage.getItem('fmat')||'null')||MATS;
 
-let mat=JSON.parse(localStorage.getItem('foltec_mat')||'null')||MATERIALES;
-let mov=JSON.parse(localStorage.getItem('foltec_mov')||'[]');
-let prod=JSON.parse(localStorage.getItem('foltec_prod')||'[]');
-let selMatId=null;
-let selProd=null;
-
-function save(){localStorage.setItem('foltec_mat',JSON.stringify(mat));localStorage.setItem('foltec_mov',JSON.stringify(mov));localStorage.setItem('foltec_prod',JSON.stringify(prod));}
-function showToast(msg){let t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
-function tab(name){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelector('#page-'+name).classList.add('active');document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');if(name==='produccion')renderProd();if(name==='historial')renderHistorial();}
-function updateStats(){let v=mat.reduce((a,m)=>a+m.stock*m.costo,0);let a=mat.filter(m=>m.stock<=m.stockMin&&m.stockMin>0).length;let s=mat.filter(m=>m.stock<=0).length;document.getElementById('stat-valor').textContent='$'+Math.round(v);document.getElementById('stat-alertas').textContent=a;document.getElementById('stat-sin').textContent=s;}
-function renderMaterials(){let q=document.getElementById('search').value.toLowerCase();let filtered=mat.filter(m=>m.producto.toLowerCase().includes(q));let html='';filtered.forEach(m=>{let color='var(--green)';if(m.stock<=0)color='var(--red)';else if(m.stock<=m.stockMin&&m.stockMin>0)color='var(--yellow)';html+=`<div class="mat-item ${selMatId===m.id?'active':''}" onclick="selMat(${m.id})"><div class="mat-item-name">${m.producto}</div><div class="mat-item-stock" style="color:${color}">${m.stock} kg</div></div>`;});document.getElementById('mat-list').innerHTML=html;updateStats();}
-function selMat(id){selMatId=id;let m=mat.find(x=>x.id===id);let movsm=mov.filter(x=>x.materialId===id).slice().reverse().slice(0,15);let html=`<div class="card"><div class="card-title">${m.producto}</div><div style="font-size:11px;color:#888;margin-bottom:14px;">${m.funcion}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;"><div style="background:var(--surface);padding:12px;border-radius:6px;border:1px solid var(--border);"><div style="font-size:10px;color:#888;">Stock</div><div style="font-family:'DM Mono';font-size:18px;font-weight:600;margin-top:4px;">${m.stock}</div></div><div style="background:var(--surface);padding:12px;border-radius:6px;border:1px solid var(--border);"><div style="font-size:10px;color:#888;">Valor</div><div style="font-family:'DM Mono';font-size:18px;font-weight:600;margin-top:4px;">$${(m.stock*m.costo).toFixed(0)}</div></div></div><button class="btn btn-primary" style="width:100%;" onclick="regMov()">Registrar movimiento</button></div>`;if(movsm.length>0){html+=`<div class="card"><div class="card-title">Últimos movimientos</div><div style="font-size:11px;">`;movsm.forEach(mv=>{html+=`<div style="padding:8px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;"><span>${mv.fecha}</span><span style="font-family:'DM Mono';">${mv.tipo==='uso'?'-':'+'}${mv.cantidad}</span></div>`;});html+='</div></div>';}document.getElementById('main-inv').innerHTML=html;renderMaterials();}
-function regMov(){let tipo=prompt('uso o compra?');if(!tipo)return;let cant=parseFloat(prompt('Cantidad en kg:'));if(!cant)return;let m=mat.find(x=>x.id===selMatId);if(tipo==='uso'&&cant>m.stock){showToast('Stock insuficiente');return;}if(tipo==='uso')m.stock-=cant;else m.stock+=cant;mov.push({id:Date.now(),materialId:selMatId,tipo,cantidad:cant,fecha:new Date().toLocaleString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})});save();showToast('✓ Movimiento registrado');selMat(selMatId);}
-function renderProd(){let html='';Object.keys(FORMULAS).forEach(p=>{html+=`<div style="background:var(--surface);padding:16px;border-radius:6px;border:1px solid var(--border);cursor:pointer;" onclick="selProdType('${p}')"><div style="font-family:'DM Mono';font-weight:600;">${p}</div></div>`;});document.getElementById('prod-list').innerHTML=html;}
-function selProdType(p){selProd=p;let html='';FORMULAS[p].forEach(pres=>{html+=`<button class="btn btn-outline" style="cursor:pointer;" onclick="selPres('${pres.pres}')">${pres.pres}</button>`;});document.getElementById('pres-list').innerHTML=html;document.getElementById('pres-box').style.display='block';}
-function selPres(pres){document.querySelectorAll('#pres-list button').forEach(b=>b.style.background=b.textContent===pres?'rgba(200,241,53,0.2)':'transparent');}
-function confirmarProd(){alert('Producción registrada (ejemplo). Feature en desarrollo');}
-function renderHistorial(){let html=prod.length>0?prod.map(p=>`<div class="card"><div class="card-title">${p.producto} - ${p.pres} × ${p.cantidad}</div><div style="font-size:11px;color:#888;">${p.fecha}</div></div>`).join(''):'<div class="no-content">Sin registro de producciones</div>';document.getElementById('hist-list').innerHTML=html;}
-renderMaterials();updateStats();
+function save(){localStorage.setItem('fmat',JSON.stringify(mats));}
+function upStats(){let v=0,a=0,z=0;for(let m of mats){v+=m.s*m.c;if(m.s<=0)z++;else if(m.s<=10)a++;}document.getElementById('stat-valor').textContent='$'+Math.round(v);document.getElementById('stat-alertas').textContent=a;document.getElementById('stat-sin').textContent=z;}
+function filterMats(){let q=document.getElementById('search-box').value.toLowerCase();let html='';for(let m of mats){if(m.p.toLowerCase().includes(q)){let col=m.s>0?'var(--green)':'var(--red)';html+=`<div class="mat-item ${sel===m.id?'active':''}" onclick="selMat(${m.id})"><div class="mat-name">${m.p}</div><div class="mat-stock" style="color:${col}">${m.s}kg</div></div>`;}}document.getElementById('mat-list').innerHTML=html;}
+function selMat(id){sel=id;let m=mats.find(x=>x.id===id);let html=`<div class="card"><div class="card-title">${m.p}</div><div style="font-size:10px;color:#888;margin-bottom:12px;">${m.f}</div><div class="card-stat"><div class="stat-box"><div class="stat-box-label">Stock</div><div class="stat-box-val">${m.s}</div></div><div class="stat-box"><div class="stat-box-label">Valor</div><div class="stat-box-val">$${(m.s*m.c).toFixed(0)}</div></div></div><button class="btn btn-primary" style="width:100%;" onclick="regMov()">Registrar movimiento</button></div>`;document.getElementById('main-detail').innerHTML=html;filterMats();upStats();}
+function regMov(){if(!sel)return;let tipo=prompt('Tipo (uso/compra):');if(!tipo)return;let cant=parseFloat(prompt('Cantidad (kg):'));if(!cant)return;let m=mats.find(x=>x.id===sel);if(tipo==='uso'){if(cant>m.s){alert('Stock insuficiente');return;}m.s-=cant;}else m.s+=cant;save();alert('✓ Movimiento registrado');selMat(sel);}
+function showPage(page){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));let id='page-'+page;document.getElementById(id).classList.add('active');document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');if(page==='inv')filterMats();}
+filterMats();upStats();
 </script>
 </body>
 </html>

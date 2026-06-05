@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOLTEC - Inventario</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0f0f0f;--surface:#1a1a1a;--surface2:#242424;--border:#2e2e2e;
+    --accent:#c8f135;--accent-dim:rgba(200,241,53,0.12);
+    --text:#f0f0f0;--text-dim:#888;
+    --red:#ff4444;--red-dim:rgba(255,68,68,0.12);
+    --yellow:#f5c518;--yellow-dim:rgba(245,197,24,0.15);
+    --green:#30d158;--green-dim:rgba(48,209,88,0.12);
+    --blue:#0a84ff;--blue-dim:rgba(10,132,255,0.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+  .logo{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;letter-spacing:.1em;color:var(--accent);}
+  .legend{display:flex;gap:14px;align-items:center;margin-top:5px;}
+  .legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-dim);}
+  .legend-dot{width:7px;height:7px;border-radius:50%;}
+  .header-stats{display:flex;gap:28px;}
+  .hstat{text-align:right;}
+  .hstat-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;}
+  .hstat-value{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;}
+  /* NAV TABS */
+  .nav-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+  .nav-tab{padding:10px 24px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--text-dim);transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif;}
+  .nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .nav-tab:hover{color:var(--text);}
+  /* LAYOUT */
+  .layout{display:flex;flex:1;overflow:hidden;}
+  .sidebar{width:270px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+  .sidebar-top{padding:14px;border-bottom:1px solid var(--border);}
+  .search{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;}
+  .search:focus{border-color:var(--accent);}
+  .search::placeholder{color:var(--text-dim);}
+  .filter-tabs{display:flex;gap:5px;margin-top:9px;flex-wrap:wrap;}
+  .ftab{padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-dim);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+  .ftab.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+  .mat-list{flex:1;overflow-y:auto;padding:7px;}
+  .mat-list::-webkit-scrollbar{width:3px;}
+  .mat-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+  .mat-item{padding:9px 11px;border-radius:6px;cursor:pointer;margin-bottom:2px;border:1px solid transparent;transition:all .15s;position:relative;}
+  .mat-item:hover{background:var(--surface2);}
+  .mat-item.active{background:var(--accent-dim);border-color:var(--accent);}
+  .mat-item.alerta-yellow{border-left:3px solid var(--yellow);}
+  .mat-item.alerta-red{border-left:3px solid var(--red);}
+  .mat-item-name{font-size:12px;font-weight:500;font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .mat-item-sub{font-size:10px;color:var(--text-dim);margin-top:2px;display:flex;justify-content:space-between;}
+  .mat-item-stock{font-family:'DM Mono',monospace;font-size:11px;}
+  .alert-dot{width:6px;height:6px;border-radius:50%;position:absolute;top:9px;right:9px;}
+  /* MAIN */
+  .main{flex:1;overflow-y:auto;padding:26px;}
+  .main::-webkit-scrollbar{width:3px;}
+  .main::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+  .mat-title{font-family:'DM Mono',monospace;font-size:21px;font-weight:500;letter-spacing:.05em;margin-bottom:4px;}
+  .mat-meta{font-size:12px;color:var(--text-dim);margin-bottom:22px;}
+  .cards-row{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:24px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:15px;}
+  .card-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin-bottom:7px;}
+  .card-value{font-family:'DM Mono',monospace;font-size:23px;font-weight:500;}
+  .card-unit{font-size:11px;color:var(--text-dim);margin-top:3px;}
+  .section-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:22px;}
+  .section-title{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin-bottom:14px;}
+  .uso-form{display:flex;gap:11px;align-items:flex-end;flex-wrap:wrap;}
+  .form-group{display:flex;flex-direction:column;gap:5px;}
+  .form-label{font-size:11px;color:var(--text-dim);}
+  .form-input{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 11px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none;transition:border-color .15s;}
+  .form-input:focus{border-color:var(--accent);}
+  .btn{padding:8px 18px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#0f0f0f;}
+  .btn-primary:hover{opacity:.85;}
+  .btn-outline{background:transparent;color:var(--accent);border:1px solid var(--accent);}
+  .btn-outline:hover{background:var(--accent-dim);}
+  .btn-blue{background:var(--blue);color:white;}
+  .btn-blue:hover{opacity:.85;}
+  table{width:100%;border-collapse:collapse;}
+  th{padding:9px 18px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);border-bottom:1px solid var(--border);font-weight:400;}
+  td{padding:11px 18px;font-size:12px;border-bottom:1px solid var(--border);}
+  tr:last-child td{border-bottom:none;}
+  .badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-family:'DM Mono',monospace;}
+  .badge-uso{background:var(--red-dim);color:var(--red);}
+  .badge-compra{background:var(--green-dim);color:var(--green);}
+  .badge-prod{background:var(--blue-dim);color:var(--blue);}
+  .empty-state{padding:36px;text-align:center;color:var(--text-dim);font-size:13px;}
+  .alert-banner{border-radius:6px;padding:11px 15px;margin-bottom:14px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:9px;}
+  .alert-banner.yellow{background:var(--yellow-dim);border:1px solid var(--yellow);color:var(--yellow);}
+  .alert-banner.red{background:var(--red-dim);border:1px solid var(--red);color:var(--red);}
+  .no-mat{display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:14px;}
+  .toast{position:fixed;bottom:22px;right:22px;padding:11px 18px;border-radius:8px;font-size:13px;font-weight:600;transform:translateY(80px);opacity:0;transition:all .3s;z-index:100;max-width:380px;}
+  .toast.show{transform:translateY(0);opacity:1;}
+  /* PRODUCCIÓN */
+  .prod-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:22px;}
+  .prod-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;cursor:pointer;transition:all .15s;}
+  .prod-card:hover{border-color:var(--blue);}
+  .prod-card.selected{border-color:var(--blue);background:var(--blue-dim);}
+  .prod-card-name{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;margin-bottom:4px;}
+  .prod-card-desc{font-size:11px;color:var(--text-dim);}
+  .presentaciones{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px;}
+  .pres-btn{padding:8px 16px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-dim);font-size:12px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s;}
+  .pres-btn:hover{border-color:var(--blue);color:var(--text);}
+  .pres-btn.active{background:var(--blue-dim);border-color:var(--blue);color:var(--blue);}
+  .ingredientes-table{width:100%;border-collapse:collapse;margin-bottom:18px;}
+  .ingredientes-table th{background:var(--surface2);padding:8px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);font-weight:400;}
+  .ingredientes-table td{padding:9px 14px;font-size:12px;border-bottom:1px solid var(--border);}
+  .ing-ok{color:var(--green);}
+  .ing-low{color:var(--yellow);}
+  .ing-no{color:var(--red);}
+  .prod-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;}
+  .prod-modal.open{display:flex;}
+  .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;width:560px;max-height:80vh;overflow-y:auto;}
+  .modal-title{font-family:'DM Mono',monospace;font-size:18px;margin-bottom:6px;}
+  .modal-sub{font-size:12px;color:var(--text-dim);margin-bottom:20px;}
+  .modal-actions{display:flex;gap:10px;margin-top:20px;}
+  .page{display:none;}
+  .page.active{display:flex;flex:1;overflow:hidden;}
+  /* HISTORIAL PROD */
+  .hist-prod-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin-bottom:8px;}
+  .hist-prod-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .hist-prod-name{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;}
+  .hist-prod-date{font-size:11px;color:var(--text-dim);}
+  .hist-prod-ing{display:flex;flex-wrap:wrap;gap:6px;}
+  .ing-chip{background:var(--surface2);border-radius:4px;padding:3px 8px;font-size:10px;font-family:'DM Mono',monospace;color:var(--text-dim);}
+</style>
+
+<script async src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://vtrxcymrxlzzrvigwiei.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_s3aj-vyY5F51ZpGN2AkAmg_DHO3Lc6O';
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+
+<script async src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header>
+  <div>
+    <div class="logo">FOLTEC / SISTEMA DE INVENTARIO</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>OK</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div>Stock bajo</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Sin stock</div>
+    </div>
+  </div>
+  <div class="header-stats">
+    <div class="hstat"><div class="hstat-label">Valor total</div><div class="hstat-value" id="hv-valor">—</div></div>
+    <div class="hstat"><div class="hstat-label">⚠ Alertas</div><div class="hstat-value" style="color:var(--yellow)" id="hv-alertas">—</div></div>
+    <div class="hstat"><div class="hstat-label">✕ Sin stock</div><div class="hstat-value" style="color:var(--red)" id="hv-sin">—</div></div>
+  </div>
+</header>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="switchPage('inventario')">Inventario</button>
+  <button class="nav-tab" onclick="switchPage('produccion')">Producción</button>
+  <button class="nav-tab" onclick="switchPage('historial')">Historial de producción</button>
+</div>
+
+<!-- PAGE: INVENTARIO -->
+<div class="page active" id="page-inventario">
+  <div class="sidebar">
+    <div class="sidebar-top">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+        <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);font-weight:500;">MATERIALES</span>
+        <button class="btn btn-primary" style="padding:4px 10px;font-size:11px;margin-left:auto;" onclick="abrirModalNuevo()">+ Nuevo</button>
+      </div>
+      <input class="search" type="text" placeholder="Buscar material..." id="search-input">
+      <div class="filter-tabs">
+        <button class="ftab active" data-filter="TODOS">Todos</button>
+        <button class="ftab" data-filter="PIGMENTO">Pigmentos</button>
+        <button class="ftab" data-filter="CARGA">Cargas</button>
+        <button class="ftab" data-filter="RESINA">Resinas</button>
+        <button class="ftab" data-filter="COALESCENTE">Coalescentes</button>
+        <button class="ftab" data-filter="ESPESANTE">Espesantes</button>
+        <button class="ftab" data-filter="ALERTA">⚠ Alertas</button>
+      </div>
+    </div>
+    <div class="mat-list" id="mat-list"></div>
+  </div>
+  <div class="main" id="main-content"><div class="no-mat">← Selecciona un material</div></div>
+</div>
+
+<!-- PAGE: PRODUCCIÓN -->
+<div class="page" id="page-produccion">
+  <div class="main" style="width:100%;max-width:900px;margin:0 auto;">
+    <h2 style="font-family:'DM Mono',monospace;font-size:20px;margin-bottom:6px;">Registrar Producción</h2>
+    <p style="font-size:12px;color:var(--text-dim);margin-bottom:24px;">Selecciona el producto y la presentación para descontar automáticamente los ingredientes del inventario.</p>
+
+    <div class="section-box">
+      <div class="section-title">1. Selecciona el producto</div>
+      <div class="prod-grid" id="prod-grid"></div>
+    </div>
+
+    <div class="section-box" id="pres-section" style="display:none">
+      <div class="section-title">2. Selecciona la presentación y cantidad a producir</div>
+      <div class="presentaciones" id="presentaciones"></div>
+      <div class="uso-form" style="margin-top:4px">
+        <div class="form-group">
+          <span class="form-label">Unidades a producir</span>
+          <input class="form-input" type="number" id="unidades-input" placeholder="1" min="1" step="1" style="width:120px" value="1">
+        </div>
+        <button class="btn btn-blue" onclick="abrirModal()">Ver ingredientes y confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: HISTORIAL PRODUCCIÓN -->
+<div class="page" id="page-historial">
+  <div class="main" style="width:100%;max-width:900px;margin:0 auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <h2 style="font-family:'DM Mono',monospace;font-size:20px;">Historial de Producción</h2>
+      <button id="btn-deshacer" class="btn btn-outline" style="display:none;gap:6px;align-items:center;" onclick="deshacerProduccion()">↩ Deshacer última producción</button>
+    </div>
+    <div id="hist-prod-list"></div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMACIÓN -->
+<div class="prod-modal" id="prod-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">Confirmar producción</div>
+    <div class="modal-sub" id="modal-sub"></div>
+    <table class="ingredientes-table">
+      <thead><tr><th>Ingrediente</th><th>Necesario</th><th>En stock</th><th>Resultado</th></tr></thead>
+      <tbody id="modal-tbody"></tbody>
+    </table>
+    <div id="modal-warning" style="display:none;margin-bottom:14px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="modal-confirm-btn" onclick="confirmarProduccion()">Confirmar y descontar</button>
+      <button class="btn btn-outline" onclick="cerrarModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- MODAL NUEVO MATERIAL -->
+<div class="prod-modal" id="modal-nuevo">
+  <div class="modal-box" style="width:480px;">
+    <div class="modal-title">Agregar nuevo material</div>
+    <div class="modal-sub" style="margin-bottom:18px;">Completa los datos del nuevo material.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group" style="grid-column:1/-1">
+        <span class="form-label">Nombre del producto *</span>
+        <input class="form-input" id="form-nuevo-producto" type="text" placeholder="Ej. ESACOL ED 30 W" style="width:100%">
+      </div>
+      <div class="form-group">
+        <span class="form-label">Función *</span>
+        <input class="form-input" id="form-nuevo-funcion" type="text" placeholder="Ej. ESPESANTE CELULÓSICO" style="width:100%">
+      </div>
+      <div class="form-group">
+        <span class="form-label">Proveedor</span>
+        <input class="form-input" id="form-nuevo-proveedor" type="text" placeholder="Ej. ELITECH" style="width:100%">
+      </div>
+      <div class="form-group">
+        <span class="form-label">Cantidad unitaria</span>
+        <input class="form-input" id="form-nuevo-unidad" type="text" placeholder="Ej. SACOS 25 KG" style="width:100%">
+      </div>
+      <div class="form-group">
+        <span class="form-label">Stock actual (kg)</span>
+        <input class="form-input" id="form-nuevo-stock" type="number" placeholder="0.00" min="0" step="0.01" style="width:100%">
+      </div>
+      <div class="form-group">
+        <span class="form-label">Costo unitario (USD/kg)</span>
+        <input class="form-input" id="form-nuevo-costo" type="number" placeholder="0.00" min="0" step="0.01" style="width:100%">
+      </div>
+      <div class="form-group">
+        <span class="form-label">Stock mínimo de alerta (kg)</span>
+        <input class="form-input" id="form-nuevo-stockmin" type="number" placeholder="0" min="0" step="1" style="width:100%">
+      </div>
+    </div>
+    <div class="modal-actions" style="margin-top:20px;">
+      <button class="btn btn-primary" onclick="guardarNuevoMaterial()">Agregar material</button>
+      <button class="btn btn-outline" onclick="cerrarModalNuevo()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATOS
+// ============================================================
+const MATERIALES_INIT = [
+  {id:4,funcion:"REGULADOR DE PH",producto:"ADIKEM 100",unidad:"PORRÓN 20 LITROS",stock:20,costo:4.94,proveedor:"ELITECH",stockMin:10},
+  {id:36,funcion:"COALESCENTE",producto:"ALCOHOL ETÍLICO",unidad:"PORRÓN 20 LITROS",stock:63.00,costo:0.97,proveedor:"POLIPRODUCTOS GARZA",stockMin:20},
+  {id:13,funcion:"PIGMENTO",producto:"AMARILLO CROMO",unidad:"SACOS 25 KG",stock:24.00,costo:7.80,proveedor:"QUÍMICA RANA",stockMin:25},
+  {id:27,funcion:"RESINA ESTIRÉN-ACRÍLICA",producto:"ARD 775",unidad:"CUBETA 19 KILOS",stock:57.00,costo:4.00,proveedor:"ELITECH",stockMin:200},
+  {id:28,funcion:"RESINA ACRÍLICA TRÁFICO",producto:"BEATRAF",unidad:"CUBETA 19 KILOS",stock:71.40,costo:1.00,proveedor:"ELITECH",stockMin:0},
+  {id:32,funcion:"ESPESANTE ACRÍLICO",producto:"BELCARE EA-220",unidad:"CUBETA 19 KILOS",stock:0.00,costo:4.00,proveedor:"ELITECH",stockMin:0},
+  {id:31,funcion:"ESPESANTE POLIURETÁNICO",producto:"BELCARE PU 40",unidad:"CUBETA 19 KILOS",stock:6.00,costo:6.90,proveedor:"ELITECH",stockMin:10},
+  {id:29,funcion:"COALESCENTE",producto:"BUTILCELLOSOLVE",unidad:"PORRÓN 20 LITROS",stock:40.00,costo:2.27,proveedor:"POLIPRODUCTOS GARZA",stockMin:10},
+  {id:7,funcion:"ANTIESPUMANTE",producto:"DEFOCARE 30 C",unidad:"CUBETA 19 KILOS",stock:24.00,costo:3.99,proveedor:"ELITECH",stockMin:5},
+  {id:8,funcion:"ANTIESPUMANTE",producto:"DISPERCLAIR",unidad:"CUBETA 19 KILOS",stock:209.00,costo:1.00,proveedor:"ELITECH",stockMin:0},
+  {id:2,funcion:"ESPESANTE CELULÓSICO",producto:"ED 50 W",unidad:"SACOS 25 KG",stock:22,costo:7.50,proveedor:"ELITECH",stockMin:0},
+  {id:1,funcion:"ESPESANTE CELULÓSICO",producto:"ESACOL ED 30 W",unidad:"SACOS 25 KG",stock:20.00,costo:10.17,proveedor:"ELITECH",stockMin:25},
+  {id:5,funcion:"COALESCENTE",producto:"MEG",unidad:"PORRÓN 20 LITROS",stock:20.00,costo:0.71,proveedor:"POLIPRODUCTOS GARZA",stockMin:10},
+  {id:25,funcion:"RESINA ACRÍLICA",producto:"MOWILITH DM - 771",unidad:"CUBETAS 18 KG",stock:18.00,costo:3.77,proveedor:"QUÍMICA RANA",stockMin:200},
+  {id:37,funcion:"RESINA VINIL ACRÍLICA",producto:"MOWILITH DM 551",unidad:"CUBETAS 18 KG",stock:0.00,costo:2.41,proveedor:"QUÍMICA RANA",stockMin:200},
+  {id:26,funcion:"RESINA ESTIRÉN ACRÍLICA",producto:"MOWILITH DM 611",unidad:"CUBETAS 18 KG",stock:18.00,costo:3.43,proveedor:"QUÍMICA RANA",stockMin:200},
+  {id:16,funcion:"PIGMENTO",producto:"NEGRO",unidad:"CUBETAS 15 KG",stock:10.00,costo:5.10,proveedor:"QUÍMICA RANA",stockMin:5},
+  {id:17,funcion:"CARGA",producto:"OMICARB 1",unidad:"SACOS 25 KG",stock:200.00,costo:0.33,proveedor:"MOLIENDAS TIZAYUCA",stockMin:125},
+  {id:18,funcion:"CARGA",producto:"OMICARB 1 T",unidad:"SACOS DE 25 KG",stock:50.00,costo:0.42,proveedor:"MOLIENDAS TIZAYUCA",stockMin:50},
+  {id:20,funcion:"CARGA",producto:"OMICARB 10",unidad:"SACOS 25 KG",stock:150,costo:0.14,proveedor:"REPTEC",stockMin:150},
+  {id:19,funcion:"CARGA",producto:"OMICARB 4",unidad:"SACOS 25 KG",stock:74.00,costo:0.27,proveedor:"MOLIENDAS TIZAYUCA",stockMin:0},
+  {id:9,funcion:"DISPERSANTE",producto:"POLIESPERSE",unidad:"CUBETA 19 KILOS",stock:24.00,costo:3.31,proveedor:"ELITECH",stockMin:10},
+  {id:12,funcion:"EXTENDER",producto:"POLIGLOSS 90",unidad:"SACOS 25 KG",stock:20.00,costo:2.34,proveedor:"MOCAYCO",stockMin:0},
+  {id:6,funcion:"HUMECTANTE",producto:"POLIWETT",unidad:"CUBETA 19 KILOS",stock:19.00,costo:8.18,proveedor:"ELITECH",stockMin:0},
+  {id:23,funcion:"RESINA VINIL ACRÍLICA",producto:"POLYMER GR-C77D",unidad:"CUBETA 19 KILOS",stock:171,costo:2.55,proveedor:"ELITECH",stockMin:200},
+  {id:24,funcion:"RESINA ACRÍLICA",producto:"POLYMER PT",unidad:"CUBETA 19 KILOS",stock:200.00,costo:2.54,proveedor:"ELITECH",stockMin:200},
+  {id:34,funcion:"BIOCIDA",producto:"PROMOCIDE ID",unidad:"PORRÓN 20 LITROS",stock:17.94,costo:3.30,proveedor:"ELITECH",stockMin:10},
+  {id:35,funcion:"BIOCIDA",producto:"PROMOCIDE OI",unidad:"PORRÓN 20 LITROS",stock:0.00,costo:9.64,proveedor:"ELITECH",stockMin:10},
+  {id:21,funcion:"CARGA",producto:"PV BRIGHT 620",unidad:"SACOS 22.68 KG",stock:120.50,costo:1.14,proveedor:"GONZALEZ CANO",stockMin:25},
+  {id:14,funcion:"PIGMENTO",producto:"ROJO ESCARLATA",unidad:"CUBETA 15 KG",stock:15.00,costo:8.23,proveedor:"QUÍMICA RANA",stockMin:5},
+  {id:15,funcion:"PIGMENTO",producto:"ROJO ÓXIDO MICRONIZADO",unidad:"SACOS 25 KG",stock:25.00,costo:3.70,proveedor:"QUÍMICA RANA",stockMin:10},
+  {id:3,funcion:"REGULADOR DE PH",producto:"SMARTEX",unidad:"PORRÓN 20 LITROS",stock:3.00,costo:7.56,proveedor:"ELITECH",stockMin:0},
+  {id:30,funcion:"COALESCENTE",producto:"TEXANOL",unidad:"PORRÓN 20 LITROS",stock:0.50,costo:3.70,proveedor:"POLIPRODUCTOS GARZA",stockMin:10},
+  {id:11,funcion:"PIGMENTO",producto:"TIO 2 NTR - 606",unidad:"SACOS 25 KG",stock:95.00,costo:3.35,proveedor:"REPTEC",stockMin:100},
+  {id:10,funcion:"PIGMENTO",producto:"TIO2 TI PURE R 706",unidad:"SACOS 25 KG",stock:64.00,costo:4.00,proveedor:"CHEMIK",stockMin:0},
+  {id:22,funcion:"SECUESTRANTE",producto:"TRIPOLIFOSFATO DE POTASIO",unidad:"SACOS DE 25 KG",stock:25.00,costo:7.70,proveedor:"QUÍMICA RANA",stockMin:5},
+  {id:33,funcion:"ESPESANTE ACRÍLICO",producto:"VISCOLAM 635",unidad:"CUBETA 19 KILOS",stock:19.00,costo:3.66,proveedor:"ELITECH",stockMin:10},
+];
+
+// FÓRMULAS: cantidades en kg por presentación (100LT, 20LT, 3.785LT, 1LT)
+// mat_id: id del material en MATERIALES_INIT
+
+// ============================================================
+// SUPABASE CONFIG
+// ============================================================
+const SUPABASE_URL = 'https://vtrxcymrxlzzrvigwiei.supabase.co';
+const SUPABASE_ANONKEY = 'sb_publishable_s3aj-vyY5F51ZpGN2AkAmg_DHO3Lc6O';
+let supabase = null;
+
+// Esperar a que Supabase cargue
+window.addEventListener('load', () => {
+  if(window.supabase){
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANONKEY);
+    console.log('Supabase inicializado');
+  }
+});
+
+const FORMULAS = {
+  "Malimper 5 Años Blanco": {
+    desc: "Impermeabilizante blanco 5 años",
+    presentaciones: {"200 LT":2,"100 LT":1,"20 LT":0.2,"Galón (3.785 LT)":0.03785,"1 LT":0.01},
+    base100: [
+      {mat_id:22, nombre:"TRIPOLIFOSFATO DE POTASIO", kg:0.1277},
+      {mat_id:9,  nombre:"POLIESPERSE",               kg:0.45972},
+      {mat_id:7,  nombre:"DEFOCARE 30 C",             kg:0.2554},
+      {mat_id:20, nombre:"OMICARB 10",                kg:36.47112},
+      {mat_id:10, nombre:"TIO2 TI PURE R 706",        kg:5.00584},
+      {mat_id:1,  nombre:"ESACOL ED 30 W",            kg:0.3831},
+      {mat_id:31, nombre:"BELCARE PU 40",             kg:0.19155},
+      {mat_id:26, nombre:"MOWILITH DM 611",           kg:44.8227},
+      {mat_id:30, nombre:"TEXANOL",                   kg:0.35756},
+      {mat_id:35, nombre:"PROMOCIDE OI",              kg:0.5108},
+      {mat_id:4,  nombre:"ADIKEM 100",                kg:0.2554},
+      {mat_id:33, nombre:"VISCOLAM 635",              kg:0.54911},
+    ]
+  },
+  "Malimper 5 Años Terracota": {
+    desc: "Impermeabilizante terracota 5 años",
+    presentaciones: {"200 LT":2,"100 LT":1,"20 LT":0.2,"Galón (3.785 LT)":0.03785,"1 LT":0.01},
+    base100: [
+      {mat_id:22, nombre:"TRIPOLIFOSFATO DE POTASIO", kg:0.1264},
+      {mat_id:9,  nombre:"POLIESPERSE",               kg:0.5688},
+      {mat_id:7,  nombre:"DEFOCARE 30 C",             kg:0.2528},
+      {mat_id:20, nombre:"OMICARB 10",                kg:35.392},
+      {mat_id:15, nombre:"ROJO ÓXIDO MICRONIZADO",    kg:3.9184},
+      {mat_id:1,  nombre:"ESACOL ED 30 W",            kg:0.316},
+      {mat_id:31, nombre:"BELCARE PU 40",             kg:0.3792},
+      {mat_id:26, nombre:"MOWILITH DM 611",           kg:44.24},
+      {mat_id:30, nombre:"TEXANOL",                   kg:0.632},
+      {mat_id:35, nombre:"PROMOCIDE OI",              kg:0.5056},
+      {mat_id:4,  nombre:"ADIKEM 100",                kg:0.1264},
+      {mat_id:33, nombre:"VISCOLAM 635",              kg:0.3792},
+    ]
+  },
+  "Maltraf Amarilla": {
+    desc: "Pintura de tráfico amarilla (8% pigmento)",
+    presentaciones: {"200 LT":2,"100 LT":1,"20 LT":0.2,"Galón (3.785 LT)":0.03785,"1 LT":0.01},
+    base100: [
+      {mat_id:9,  nombre:"POLIESPERSE",          kg:0.786},
+      {mat_id:7,  nombre:"DEFOCARE 30 C",        kg:1.048},
+      {mat_id:13, nombre:"AMARILLO CROMO",        kg:10.48},
+      {mat_id:14, nombre:"ROJO ESCARLATA",        kg:0.2227},
+      {mat_id:10, nombre:"TIO2 TI PURE R 706",   kg:2.62},
+      {mat_id:17, nombre:"OMICARB 1",             kg:46.4264},
+      {mat_id:28, nombre:"BEATRAF",               kg:10.48},
+      {mat_id:30, nombre:"TEXANOL",               kg:1.965},
+      {mat_id:36, nombre:"ALCOHOL ETÍLICO",       kg:2.62},
+      {mat_id:34, nombre:"PROMOCIDE ID",          kg:0.262},
+      {mat_id:31, nombre:"BELCARE PU 40",         kg:2.9999},
+    ]
+  },
+  "Maltraf Blanca": {
+    desc: "Pintura de tráfico blanca",
+    presentaciones: {"200 LT":2,"100 LT":1,"20 LT":0.2,"Galón (3.785 LT)":0.03785,"1 LT":0.01},
+    base100: [
+      {mat_id:9,  nombre:"POLIESPERSE",          kg:0.804},
+      {mat_id:7,  nombre:"DEFOCARE 30 C",        kg:1.072},
+      {mat_id:10, nombre:"TIO2 TI PURE R 706",   kg:13.40},
+      {mat_id:17, nombre:"OMICARB 1",             kg:43.992},
+      {mat_id:21, nombre:"PV BRIGHT 620",         kg:6.70},
+      {mat_id:28, nombre:"BEATRAF",               kg:10.72},
+      {mat_id:30, nombre:"TEXANOL",               kg:2.010},
+      {mat_id:36, nombre:"ALCOHOL ETÍLICO",       kg:2.68},
+      {mat_id:34, nombre:"PROMOCIDE ID",          kg:0.268},
+      {mat_id:31, nombre:"BELCARE PU 40",         kg:2.7738},
+    ]
+  },
+  "Malvex Plus": {
+    desc: "Pintura interior blanca semi mate",
+    presentaciones: {"200 LT":2,"100 LT":1,"20 LT":0.2,"Galón (3.785 LT)":0.03785,"1 LT":0.01},
+    base100: [
+      {mat_id:5,  nombre:"MEG",               kg:1.980},
+      {mat_id:9,  nombre:"POLIESPERSE",        kg:0.660},
+      {mat_id:7,  nombre:"DEFOCARE 30 C",      kg:0.330},
+      {mat_id:10, nombre:"TIO2 TI PURE R 706", kg:22.44},
+      {mat_id:1,  nombre:"ESACOL ED 30 W",     kg:0.5544},
+      {mat_id:17, nombre:"OMICARB 1",          kg:13.200},
+      {mat_id:1,  nombre:"ESACOL ED 30 W (2)", kg:0.5544},
+      {mat_id:37, nombre:"MOWILITH DM 551",    kg:48.444},
+      {mat_id:4,  nombre:"ADIKEM 100",         kg:0.330},
+      {mat_id:29, nombre:"BUTILCELLOSOLVE",     kg:1.980},
+      {mat_id:30, nombre:"TEXANOL",             kg:0.924},
+      {mat_id:35, nombre:"PROMOCIDE OI",        kg:0.528},
+      {mat_id:7,  nombre:"DEFOCARE 30 C (2)",  kg:0.330},
+      {mat_id:31, nombre:"BELCARE PU 40",       kg:0.660},
+    ]
+  },
+  "Malvex Ultra": {
+    desc: "Pintura blanca semi mate premium",
+    presentaciones: {"200 LT":2,"100 LT":1,"20 LT":0.2,"Galón (3.785 LT)":0.03785,"1 LT":0.01},
+    base100: [
+      {mat_id:5,  nombre:"MEG",               kg:1.935},
+      {mat_id:9,  nombre:"POLIESPERSE",        kg:0.645},
+      {mat_id:7,  nombre:"DEFOCARE 30 C",      kg:0.4515},
+      {mat_id:10, nombre:"TIO2 TI PURE R 706", kg:25.80},
+      {mat_id:1,  nombre:"ESACOL ED 30 W",     kg:0.3225},
+      {mat_id:17, nombre:"OMICARB 1",          kg:6.45},
+      {mat_id:1,  nombre:"ESACOL ED 30 W (2)", kg:0.3225},
+      {mat_id:25, nombre:"MOWILITH DM - 771",  kg:51.2388},
+      {mat_id:4,  nombre:"ADIKEM 100",         kg:0.387},
+      {mat_id:29, nombre:"BUTILCELLOSOLVE",     kg:0.387},
+      {mat_id:30, nombre:"TEXANOL",             kg:1.6125},
+      {mat_id:35, nombre:"PROMOCIDE OI",        kg:0.516},
+      {mat_id:7,  nombre:"DEFOCARE 30 C (2)",  kg:0.4515},
+      {mat_id:31, nombre:"BELCARE PU 40",       kg:0.387},
+    ]
+  }};
+
+const PRODUCTOS_LIST = ["Malin Pro","Malvex Plus","Malvex Ultra","Maltraf Blanca","Maltraf Amarilla","Otro"];
+
+// ============================================================
+// ESTADO
+// ============================================================
+let materiales = JSON.parse(JSON.stringify(MATERIALES_INIT));
+let supabaseReady = false;
+let movimientos = JSON.parse(localStorage.getItem('foltec_mov3')||'[]');
+let prodHistorial = JSON.parse(localStorage.getItem('foltec_prod3')||'[]');
+let selectedId=null, filtro='TODOS', busqueda='';
+let selectedProd=null, selectedPres=null;
+let currentPage='inventario';
+let snapshotAntesProd=null;
+
+async function save(){
+  if(!supabaseReady) return;
+  try{
+    // Sincronizar materiales
+    for(let mat of materiales){
+      const {data} = await supabase.from('materiales').select('id').eq('id',mat.id).single();
+      if(data){
+        await supabase.from('materiales').update({stock:mat.stock,stock_min:mat.stock_min}).eq('id',mat.id);
+      } else {
+        await supabase.from('materiales').insert([mat]);
+      }
+    }
+  }catch(e){console.error('Save error:',e);}
+}
+
+function guardarSnapshot(){
+  snapshotAntesProd={
+    materiales: JSON.parse(JSON.stringify(materiales)),
+    movimientos: JSON.parse(JSON.stringify(movimientos)),
+    prodHistorial: JSON.parse(JSON.stringify(prodHistorial))
+  };
+}
+
+function deshacerProduccion(){
+  if(!snapshotAntesProd){showToast('No hay producción para deshacer','yellow');return;}
+  if(!confirm('¿Deshacer la última producción? Se restaurará el inventario al estado anterior.')) return;
+  materiales=snapshotAntesProd.materiales;
+  movimientos=snapshotAntesProd.movimientos;
+  prodHistorial=snapshotAntesProd.prodHistorial;
+  snapshotAntesProd=null;
+  save();
+  showToast('↩ Producción deshecha. Inventario restaurado.','yellow');
+  updateHeader();
+  
+// ============================================================
+// INICIALIZAR SUPABASE
+// ============================================================
+async function initSupabase(){
+  try{
+    const {data:mats} = await supabase.from('materiales').select('*');
+    if(mats && mats.length > 0){
+      materiales = mats.map(m=>({
+        id:m.id,producto:m.producto,funcion:m.funcion,unidad:m.unidad,
+        stock:parseFloat(m.stock),costo:parseFloat(m.costo),
+        proveedor:m.proveedor,stockMin:parseFloat(m.stock_min)
+      }));
+    }
+    const {data:movs} = await supabase.from('movimientos').select('*');
+    if(movs) movimientos = movs.map(m=>({
+      id:m.id,materialId:m.material_id,tipo:m.tipo,cantidad:parseFloat(m.cantidad),
+      stockResultante:parseFloat(m.stock_resultante),producto:m.producto,notas:m.notas,fecha:m.fecha
+    }));
+    const {data:prods} = await supabase.from('prod_historial').select('*');
+    if(prods) prodHistorial = prods.map(p=>({
+      id:p.id,producto:p.producto,presentacion:p.presentacion,unidades:p.unidades,
+      ingredientes:p.ingredientes,fecha:p.fecha
+    }));
+    supabaseReady = true;
+    renderSidebar();
+    renderMain();
+  }catch(e){
+    console.error('Init error:',e);
+    supabaseReady = false;
+    renderSidebar();
+    renderMain();
+  }
+}
+
+initSupabase();
+  if(selectedId) renderMain();
+  renderProdHistorial();
+  document.getElementById('btn-deshacer').style.display='none';
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function getAlertLevel(m){
+  if(m.stock<=0) return 'red';
+  if(m.stockMin>0&&m.stock<=m.stockMin) return 'yellow';
+  return 'green';
+}
+function getColor(m){
+  const l=getAlertLevel(m);
+  if(l==='red') return 'var(--red)';
+  if(l==='yellow') return 'var(--yellow)';
+  return 'var(--green)';
+}
+function getMat(id){return materiales.find(m=>m.id===id);}
+function fmt(n){return parseFloat(n.toFixed(4));}
+
+// ============================================================
+// HEADER STATS
+// ============================================================
+function updateHeader(){
+  const tv=materiales.reduce((a,m)=>a+m.stock*m.costo,0);
+  document.getElementById('hv-valor').textContent='$'+tv.toFixed(0);
+  document.getElementById('hv-alertas').textContent=materiales.filter(m=>getAlertLevel(m)==='yellow').length;
+  document.getElementById('hv-sin').textContent=materiales.filter(m=>getAlertLevel(m)==='red').length;
+}
+
+// ============================================================
+// INVENTARIO
+// ============================================================
+function renderSidebar(){
+  let filtered=materiales.filter(m=>{
+    const mb=m.producto.toLowerCase().includes(busqueda.toLowerCase())||m.funcion.toLowerCase().includes(busqueda.toLowerCase());
+    if(filtro==='TODOS') return mb;
+    if(filtro==='ALERTA') return mb&&(getAlertLevel(m)!=='green');
+    return mb&&m.funcion.toUpperCase().includes(filtro);
+  });
+  document.getElementById('mat-list').innerHTML=filtered.map(m=>{
+    const color=getColor(m);
+    const level=getAlertLevel(m);
+    return `<div class="mat-item ${selectedId===m.id?'active':''} ${level!=='green'?'alerta-'+level:''}" onclick="selectMat(${m.id})">
+      <div class="mat-item-name">${m.producto}</div>
+      <div class="mat-item-sub"><span>${m.funcion}</span><span class="mat-item-stock" style="color:${color}">${m.stock} kg</span></div>
+      <div class="alert-dot" style="background:${color}"></div>
+      <button onclick="event.stopPropagation();eliminarMaterial(${m.id})" style="position:absolute;bottom:7px;right:8px;background:transparent;border:none;color:var(--text-dim);font-size:12px;cursor:pointer;padding:0;line-height:1;" title="Eliminar">✕</button>
+    </div>`;
+  }).join('');
+  updateHeader();
+}
+
+function renderMain(){
+  const main=document.getElementById('main-content');
+  if(!selectedId){main.innerHTML='<div class="no-mat">← Selecciona un material</div>';return;}
+  const mat=getMat(selectedId);
+  const matMovs=movimientos.filter(mv=>mv.materialId===selectedId).slice().reverse().slice(0,20);
+  const level=getAlertLevel(mat);
+  const color=getColor(mat);
+  const alertHtml=level==='red'
+    ?`<div class="alert-banner red">✕ SIN STOCK — Contactar a ${mat.proveedor}</div>`
+    :level==='yellow'
+    ?`<div class="alert-banner yellow">⚠ Stock bajo mínimo de ${mat.stockMin} kg — Proveedor: ${mat.proveedor}</div>`:'';
+  main.innerHTML=`
+    ${alertHtml}
+    <div class="mat-title">${mat.producto}</div>
+    <div class="mat-meta">${mat.funcion} &nbsp;·&nbsp; ${mat.proveedor} &nbsp;·&nbsp; $${mat.costo} USD/kg &nbsp;·&nbsp; ${mat.unidad}</div>
+    <div class="cards-row">
+      <div class="card" style="border-color:${color}40">
+        <div class="card-label">Stock actual</div>
+        <div class="card-value" style="color:${color}">${mat.stock}</div>
+        <div class="card-unit">kg</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Valor en inventario</div>
+        <div class="card-value">$${(mat.stock*mat.costo).toFixed(2)}</div>
+        <div class="card-unit">USD</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Stock mínimo</div>
+        <div class="card-value" style="color:${mat.stockMin?'var(--yellow)':'var(--text-dim)'}">${mat.stockMin||'—'}</div>
+        <div class="card-unit">${mat.stockMin?'kg alerta':'sin definir'}</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Movimientos</div>
+        <div class="card-value">${movimientos.filter(mv=>mv.materialId===selectedId).length}</div>
+        <div class="card-unit">registrados</div>
+      </div>
+    </div>
+    <div class="section-box">
+      <div class="section-title">Registrar movimiento manual</div>
+      <div class="uso-form">
+        <div class="form-group"><span class="form-label">Tipo</span>
+          <select class="form-input" id="tipo-mov" onchange="toggleProducto()">
+            <option value="uso">Uso / Producción manual</option>
+            <option value="compra">Compra / Entrada</option>
+          </select>
+        </div>
+        <div class="form-group"><span class="form-label">Cantidad (kg)</span>
+          <input class="form-input" type="number" id="cantidad-input" placeholder="0.00" min="0" step="0.01" style="width:110px">
+        </div>
+        <div class="form-group" id="producto-group"><span class="form-label">Producto</span>
+          <select class="form-input" id="producto-select">${PRODUCTOS_LIST.map(p=>`<option>${p}</option>`).join('')}</select>
+        </div>
+        <div class="form-group"><span class="form-label">Notas</span>
+          <input class="form-input" type="text" id="notas-input" placeholder="..." style="width:130px">
+        </div>
+        <button class="btn btn-primary" onclick="registrar()">Registrar</button>
+        <button class="btn btn-outline" onclick="editarMinimo()">Editar mínimo</button>
+      </div>
+    </div>
+    <div class="section-box" style="padding:0;overflow:hidden">
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim)">Historial de movimientos</div>
+      ${matMovs.length===0?'<div class="empty-state">Sin movimientos aún</div>':`
+      <table><thead><tr><th>Fecha</th><th>Tipo</th><th>Cantidad</th><th>Stock result.</th><th>Producto / Notas</th></tr></thead>
+      <tbody>${matMovs.map(mv=>`<tr>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim)">${mv.fecha}</td>
+        <td><span class="badge ${mv.tipo==='uso'?'badge-uso':mv.tipo==='prod'?'badge-prod':'badge-compra'}">${mv.tipo==='uso'?'▼ USO':mv.tipo==='prod'?'⚙ PROD':'▲ COMPRA'}</span></td>
+        <td style="font-family:'DM Mono',monospace;color:${mv.tipo==='compra'?'var(--green)':'var(--red)'}">${mv.tipo==='compra'?'+':'-'}${mv.cantidad} kg</td>
+        <td style="font-family:'DM Mono',monospace">${mv.stockResultante} kg</td>
+        <td style="color:var(--text-dim)">${mv.producto||mv.notas||'—'}</td>
+      </tr>`).join('')}</tbody></table>`}
+    </div>`;
+}
+
+function toggleProducto(){
+  const el=document.getElementById('producto-group');
+  if(el) el.style.display=document.getElementById('tipo-mov').value==='uso'?'flex':'none';
+}
+function selectMat(id){selectedId=id;renderSidebar();renderMain();}
+
+function registrar(){
+  const cantidad=parseFloat(document.getElementById('cantidad-input').value);
+  if(!cantidad||cantidad<=0){showToast('Ingresa una cantidad válida');return;}
+  const tipo=document.getElementById('tipo-mov').value;
+  const mat=getMat(selectedId);
+  if(tipo==='uso'&&cantidad>mat.stock){showToast('⚠ Stock insuficiente');return;}
+  if(tipo==='uso') mat.stock=fmt(mat.stock-cantidad);
+  else mat.stock=fmt(mat.stock+cantidad);
+  movimientos.push({
+    id:Date.now(),materialId:selectedId,tipo,cantidad,
+    stockResultante:mat.stock,
+    producto:tipo==='uso'?document.getElementById('producto-select').value:null,
+    notas:document.getElementById('notas-input').value,
+    fecha:new Date().toLocaleString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})
+  });
+  save();
+  const level=getAlertLevel(mat);
+  if(level==='yellow') showToast(`⚠ ${mat.producto} bajó del mínimo`,'yellow');
+  else if(level==='red') showToast(`✕ ${mat.producto} sin stock`,'red');
+  else showToast(tipo==='uso'?`✓ Descontados ${cantidad} kg de ${mat.producto}`:`✓ Agregados ${cantidad} kg a ${mat.producto}`,'green');
+  renderSidebar();renderMain();
+}
+
+function editarMinimo(){
+  const mat=getMat(selectedId);
+  const nuevo=prompt(`Stock mínimo para ${mat.producto} (kg):`,mat.stockMin||'');
+  if(nuevo!==null){mat.stockMin=parseFloat(nuevo)||0;save();renderSidebar();renderMain();}
+}
+
+// ============================================================
+// PRODUCCIÓN
+// ============================================================
+function renderProdGrid(){
+  const grid=document.getElementById('prod-grid');
+  grid.innerHTML=Object.keys(FORMULAS).map(nombre=>{
+    const f=FORMULAS[nombre];
+    return `<div class="prod-card ${selectedProd===nombre?'selected':''}" onclick="seleccionarProd('${nombre}')">
+      <div class="prod-card-name">${nombre}</div>
+      <div class="prod-card-desc">${f.desc}</div>
+    </div>`;
+  }).join('');
+}
+
+function seleccionarProd(nombre){
+  selectedProd=nombre;
+  selectedPres=null;
+  renderProdGrid();
+  const sec=document.getElementById('pres-section');
+  sec.style.display='block';
+  const f=FORMULAS[nombre];
+  document.getElementById('presentaciones').innerHTML=Object.keys(f.presentaciones).map(p=>
+    `<button class="pres-btn ${selectedPres===p?'active':''}" onclick="seleccionarPres('${p}')">${p}</button>`
+  ).join('');
+}
+
+function seleccionarPres(pres){
+  selectedPres=pres;
+  document.querySelectorAll('.pres-btn').forEach(b=>{
+    b.classList.toggle('active',b.textContent===pres);
+  });
+}
+
+function calcIngredientes(prodNombre,presNombre,unidades){
+  const f=FORMULAS[prodNombre];
+  const factor=f.presentaciones[presNombre]*unidades;
+  // Agrupar por mat_id (hay ingredientes duplicados como ESACOL que se suman)
+  const agrupado={};
+  f.base100.forEach(ing=>{
+    const key=ing.mat_id;
+    if(!agrupado[key]) agrupado[key]={mat_id:ing.mat_id,nombre:getMat(ing.mat_id)?.producto||ing.nombre,kg:0};
+    agrupado[key].kg+=ing.kg;
+  });
+  return Object.values(agrupado).map(ing=>({
+    ...ing,
+    kgNecesario:fmt(ing.kg*factor)
+  }));
+}
+
+function abrirModal(){
+  if(!selectedProd){showToast('Selecciona un producto','yellow');return;}
+  if(!selectedPres){showToast('Selecciona una presentación','yellow');return;}
+  const unidades=parseInt(document.getElementById('unidades-input').value)||1;
+  const ings=calcIngredientes(selectedProd,selectedPres,unidades);
+  
+  document.getElementById('modal-title').textContent=`${selectedProd} — ${selectedPres} × ${unidades}`;
+  document.getElementById('modal-sub').textContent=`Se descontarán los siguientes ingredientes del inventario:`;
+  
+  let hayProblema=false;
+  const tbody=document.getElementById('modal-tbody');
+  tbody.innerHTML=ings.map(ing=>{
+    const mat=getMat(ing.mat_id);
+    const stock=mat?mat.stock:0;
+    const resultado=fmt(stock-ing.kgNecesario);
+    let cls='ing-ok', estado='✓';
+    if(ing.kgNecesario>stock){cls='ing-no';estado='✕ INSUFICIENTE';hayProblema=true;}
+    else if(resultado<=((mat&&mat.stockMin)||0)){cls='ing-low';estado='⚠ Quedará bajo mínimo';}
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:12px">${ing.nombre}</td>
+      <td style="font-family:'DM Mono',monospace">${ing.kgNecesario} kg</td>
+      <td style="font-family:'DM Mono',monospace">${stock} kg</td>
+      <td class="${cls}" style="font-size:11px;font-weight:500">${estado} (${resultado} kg)</td>
+    </tr>`;
+  }).join('');
+
+  const warning=document.getElementById('modal-warning');
+  const btn=document.getElementById('modal-confirm-btn');
+  if(hayProblema){
+    warning.style.display='block';
+    warning.innerHTML=`<div class="alert-banner red">✕ Stock insuficiente en uno o más ingredientes. No se puede confirmar.</div>`;
+    btn.style.opacity='0.4';btn.style.pointerEvents='none';
+  } else {
+    warning.style.display='none';
+    btn.style.opacity='1';btn.style.pointerEvents='auto';
+  }
+  document.getElementById('prod-modal').classList.add('open');
+}
+
+function cerrarModal(){
+  document.getElementById('prod-modal').classList.remove('open');
+}
+
+function confirmarProduccion(){
+  guardarSnapshot();
+  const unidades=parseInt(document.getElementById('unidades-input').value)||1;
+  const ings=calcIngredientes(selectedProd,selectedPres,unidades);
+  const fecha=new Date().toLocaleString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  
+  ings.forEach(ing=>{
+    const mat=getMat(ing.mat_id);
+    if(!mat) return;
+    const antes=mat.stock;
+    mat.stock=fmt(mat.stock-ing.kgNecesario);
+    movimientos.push({
+      id:Date.now()+ing.mat_id,
+      materialId:ing.mat_id,tipo:'prod',
+      cantidad:ing.kgNecesario,
+      stockResultante:mat.stock,
+      producto:`${selectedProd} (${selectedPres} × ${unidades})`,
+      notas:'',fecha
+    });
+  });
+
+  prodHistorial.unshift({
+    id:Date.now(),
+    producto:selectedProd,
+    presentacion:selectedPres,
+    unidades,
+    ingredientes:ings.map(i=>({nombre:i.nombre,kg:i.kgNecesario})),
+    fecha
+  });
+
+  save();
+  cerrarModal();
+  showToast(`✓ Producción registrada: ${selectedProd} ${selectedPres} × ${unidades}`,'green');
+  updateHeader();
+  renderProdHistorial();
+  const btnD=document.getElementById('btn-deshacer');
+  if(btnD) btnD.style.display='inline-flex';
+}
+
+// ============================================================
+// HISTORIAL PRODUCCIÓN
+// ============================================================
+function renderProdHistorial(){
+  const el=document.getElementById('hist-prod-list');
+  if(!el) return;
+  if(prodHistorial.length===0){el.innerHTML='<div class="empty-state">Sin producciones registradas aún</div>';return;}
+  el.innerHTML=prodHistorial.slice(0,50).map(p=>`
+    <div class="hist-prod-item">
+      <div class="hist-prod-header">
+        <div>
+          <span class="hist-prod-name">${p.producto}</span>
+          <span style="margin-left:10px;font-size:11px;color:var(--text-dim)">${p.presentacion} × ${p.unidades}</span>
+        </div>
+        <div class="hist-prod-date">${p.fecha}</div>
+      </div>
+      <div class="hist-prod-ing">
+        ${p.ingredientes.map(i=>`<span class="ing-chip">${i.nombre}: ${i.kg} kg</span>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// ============================================================
+// NAVEGACIÓN
+// ============================================================
+function switchPage(page){
+  currentPage=page;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>{
+    if(t.textContent.toLowerCase().includes(page==='inventario'?'invent':page==='produccion'?'prod':'hist')) t.classList.add('active');
+  });
+  if(page==='produccion') renderProdGrid();
+  if(page==='historial') renderProdHistorial();
+}
+
+// Arreglo nav tabs
+document.querySelectorAll('.nav-tab').forEach((btn,i)=>{
+  const pages=['inventario','produccion','historial'];
+  btn.onclick=()=>switchPage(pages[i]);
+});
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg,type='green'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.background=type==='red'?'var(--red)':type==='yellow'?'var(--yellow)':'var(--accent)';
+  t.style.color=type==='red'?'white':'#0f0f0f';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.getElementById('search-input').addEventListener('input',function(){busqueda=this.value;renderSidebar();});
+document.querySelectorAll('.ftab').forEach(btn=>btn.addEventListener('click',function(){
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
+  this.classList.add('active');filtro=this.dataset.filter;renderSidebar();
+}));
+document.getElementById('prod-modal').addEventListener('click',function(e){
+  if(e.target===this) cerrarModal();
+});
+document.getElementById('modal-nuevo').addEventListener('click',function(e){
+  if(e.target===this) cerrarModalNuevo();
+});
+
+renderSidebar();
+renderMain();
+
+// ============================================================
+// AGREGAR / ELIMINAR MATERIAL
+// ============================================================
+function abrirModalNuevo(){
+  document.getElementById('modal-nuevo').classList.add('open');
+  document.getElementById('form-nuevo-producto').value='';
+  document.getElementById('form-nuevo-funcion').value='';
+  document.getElementById('form-nuevo-unidad').value='';
+  document.getElementById('form-nuevo-stock').value='';
+  document.getElementById('form-nuevo-costo').value='';
+  document.getElementById('form-nuevo-proveedor').value='';
+  document.getElementById('form-nuevo-stockmin').value='';
+}
+
+function cerrarModalNuevo(){
+  document.getElementById('modal-nuevo').classList.remove('open');
+}
+
+function guardarNuevoMaterial(){
+  const producto=document.getElementById('form-nuevo-producto').value.trim().toUpperCase();
+  const funcion=document.getElementById('form-nuevo-funcion').value.trim().toUpperCase();
+  const unidad=document.getElementById('form-nuevo-unidad').value.trim().toUpperCase();
+  const stock=parseFloat(document.getElementById('form-nuevo-stock').value)||0;
+  const costo=parseFloat(document.getElementById('form-nuevo-costo').value)||0;
+  const proveedor=document.getElementById('form-nuevo-proveedor').value.trim().toUpperCase();
+  const stockMin=parseFloat(document.getElementById('form-nuevo-stockmin').value)||0;
+  if(!producto||!funcion){showToast('Nombre y función son obligatorios','yellow');return;}
+  const newId=Math.max(...materiales.map(m=>m.id))+1;
+  materiales.push({id:newId,funcion,producto,unidad,stock,costo,proveedor,stockMin});
+  materiales.sort((a,b)=>a.producto.localeCompare(b.producto));
+  save();
+  cerrarModalNuevo();
+  showToast(`✓ ${producto} agregado al inventario`,'green');
+  renderSidebar();
+  updateHeader();
+}
+
+function eliminarMaterial(id){
+  const mat=getMat(id);
+  if(!confirm(`¿Eliminar "${mat.producto}" del inventario?\nEsta acción no se puede deshacer.`)) return;
+  materiales=materiales.filter(m=>m.id!==id);
+  if(selectedId===id){selectedId=null;document.getElementById('main-content').innerHTML='<div class="no-mat">← Selecciona un material</div>';}
+  save();
+  showToast(`Eliminado: ${mat.producto}`,'yellow');
+  renderSidebar();
+  updateHeader();
+}
+</script>
+</body>
+</html>
